@@ -3,99 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberCore v2 | 3D Showcase</title>
+    <title>CyberCore v2 | Interactive Showcase</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; }
-        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        .ui-overlay { position: relative; z-index: 2; width: 320px; height: 100vh; padding: 40px; pointer-events: none; background: rgba(0,0,0,0.8); }
-        .ui-overlay * { pointer-events: auto; }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon); margin: 0; text-shadow: 0 0 10px var(--neon); }
-        .spec-card { background: rgba(255,255,255,0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 20px 0; font-size: 0.85rem; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
-        button:hover { background: var(--neon); color: black; }
+        :root { --neon: #00f2ff; --bg: #050505; --panel: rgba(0, 0, 0, 0.85); }
+        
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        /* Full-screen 3D Model */
+        .model-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;
+        }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* UI Overlay */
+        .interface {
+            position: relative; z-index: 10; width: 380px; height: 100vh;
+            background: linear-gradient(to right, var(--panel), transparent);
+            padding: 60px 40px; box-sizing: border-box; pointer-events: none;
+        }
+        .interface * { pointer-events: auto; }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; color: var(--neon); margin: 0; text-shadow: 0 0 15px var(--neon); }
+        .tagline { letter-spacing: 3px; text-transform: uppercase; font-size: 0.7rem; opacity: 0.6; margin-bottom: 30px; }
+
+        .data-card {
+            background: rgba(255, 255, 255, 0.03); border-left: 2px solid var(--neon);
+            padding: 20px; margin: 20px 0; backdrop-filter: blur(10px);
+            border-radius: 0 8px 8px 0; font-size: 0.85rem; line-height: 1.6;
+        }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+        .label { opacity: 0.5; font-size: 0.7rem; text-transform: uppercase; }
+
+        .footer-note { position: fixed; bottom: 30px; left: 40px; font-size: 0.7rem; opacity: 0.4; }
+
+        /* Hide Sketchfab UI elements for a cleaner look */
+        .overlay-blocker { position: fixed; bottom: 0; right: 0; width: 100px; height: 50px; z-index: 5; background: transparent; }
     </style>
 </head>
 <body>
-    <div id="canvas-container"></div>
-    <div class="ui-overlay">
+
+    <!-- 1. The 3D Model (Sketchfab Iframe) -->
+    <div class="model-container">
+        <iframe title="Custom Gaming PC" 
+            src="https://sketchfab.com">
+        </iframe>
+    </div>
+
+    <!-- 2. The Business Interface -->
+    <div class="interface">
+        <p class="tagline">Interactive Product Demo</p>
         <h1>CYBERCORE V2</h1>
-        <div class="spec-card"><strong>3D SYSTEM INSPECTOR</strong><br>Status: Online</div>
-        <div class="controls">
-            <button onclick="window.explodePC()">EXPLODE</button>
-            <button onclick="window.resetPC()">ASSEMBLE</button>
-            <button id="rot-btn" onclick="window.toggleRotation()">ROTATION: ON</button>
-            <button onclick="window.changeColor(0xff0000)">RED MODE</button>
+        
+        <div class="data-card">
+            <strong>HARDWARE OVERVIEW</strong><br>
+            A high-performance modular build designed for 2026 industry standards.
+        </div>
+
+        <div class="data-card">
+            <div class="stat-row"><span class="label">Architecture</span><span>Custom Liquid Cooled</span></div>
+            <div class="stat-row"><span class="label">GPU Array</span><span>ASUS ROG Strix</span></div>
+            <div class="stat-row"><span class="label">Memory</span><span>RGB DDR5 Modular</span></div>
+            <div class="stat-row"><span class="label">Sync Mode</span><span>Active Neon-Sync</span></div>
+        </div>
+
+        <div class="data-card">
+            <strong>USER INTERACTION</strong><br>
+            • Click and drag to rotate unit.<br>
+            • Scroll to zoom components.<br>
+            • Right-click to pan view.
         </div>
     </div>
 
-    <!-- GSAP for animations -->
-    <script src="https://cloudflare.com"></script>
+    <div class="footer-note">Model by Yolala3D | Powered by Sketchfab API</div>
 
-    <script type="module">
-        import * as THREE from 'https://jsdelivr.net';
-        import { OrbitControls } from 'https://jsdelivr.net';
-        import { GLTFLoader } from 'https://jsdelivr.net';
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-        
-        // MOVED CAMERA BACK (Zoomed out significantly)
-        camera.position.set(20, 10, 40); 
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        // BOOSTED LIGHTING
-        scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-        const light = new THREE.DirectionalLight(0xffffff, 3);
-        light.position.set(10, 20, 10);
-        scene.add(light);
-
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-
-        let model, isRotating = true;
-        const loader = new GLTFLoader();
-
-        // Loading pc.glb
-        loader.load('./pc.glb', (gltf) => {
-            model = gltf.scene;
-            
-            // INCREASED SCALE DRAMATICALLY (Change 50 to 100 if still invisible)
-            model.scale.set(50, 50, 50); 
-            
-            scene.add(model);
-            console.log("Model loaded at 50x scale!");
-        }, undefined, (err) => {
-            console.error("Path error: Ensure file is named exactly pc.glb", err);
-        });
-
-        window.toggleRotation = () => { isRotating = !isRotating; };
-        window.explodePC = () => {
-            if (model) model.traverse(n => { if (n.isMesh) gsap.to(n.position, { x: (Math.random()-0.5)*50, y: (Math.random()-0.5)*50, z: (Math.random()-0.5)*50, duration: 1.5 }); });
-        };
-        window.resetPC = () => {
-            if (model) model.traverse(n => { if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1 }); });
-        };
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if (isRotating && model) model.rotation.y += 0.005;
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
 </body>
 </html>
