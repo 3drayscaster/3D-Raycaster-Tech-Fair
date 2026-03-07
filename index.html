@@ -4,25 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberCore v2 | 3D Showcase</title>
+    <!-- Google Fonts for Tech Aesthetic -->
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; }
-        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
+        :root { --neon: #00f2ff; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        
         #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        .ui-overlay { position: relative; z-index: 2; width: 320px; height: 100vh; padding: 40px; pointer-events: none; background: rgba(0,0,0,0.8); }
+
+        .ui-overlay {
+            position: relative; z-index: 2; width: 350px; height: 100vh;
+            padding: 60px 40px; pointer-events: none;
+            background: linear-gradient(to right, rgba(0,0,0,0.9), transparent);
+        }
         .ui-overlay * { pointer-events: auto; }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon); margin: 0; text-shadow: 0 0 10px var(--neon); }
-        .spec-card { background: rgba(255,255,255,0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 20px 0; font-size: 0.85rem; line-height: 1.4; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 10px; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; transition: 0.3s; }
-        button:hover { background: var(--neon); color: black; }
+
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: var(--neon); margin: 0; text-shadow: 0 0 15px var(--neon); }
+        .tagline { letter-spacing: 4px; text-transform: uppercase; font-size: 0.8rem; opacity: 0.6; margin-bottom: 20px; }
+
+        .spec-card {
+            background: var(--glass); border-left: 3px solid var(--neon);
+            padding: 15px; margin: 30px 0; border-radius: 0 10px 10px 0;
+            backdrop-filter: blur(12px); font-size: 0.9rem; line-height: 1.6;
+        }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px; }
+        button {
+            background: transparent; border: 1px solid var(--neon); color: var(--neon);
+            padding: 12px; cursor: pointer; font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem; transition: 0.3s; border-radius: 4px;
+            text-transform: uppercase;
+        }
+        button:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
     </style>
 </head>
 <body>
+
     <div id="canvas-container"></div>
+
     <div class="ui-overlay">
+        <p class="tagline">Tech Fair Concept 2026</p>
         <h1>CYBERCORE V2</h1>
-        <div class="spec-card"><strong>3D SYSTEM INSPECTOR</strong><br>Status: Online<br>Mode: Tech Fair Showcase</div>
+        
+        <div class="spec-card">
+            <strong>Active RGB Sync</strong><br>
+            Dynamic lighting reacts to system load. Cycle colors below.
+        </div>
+
+        <div class="spec-card">
+            <strong>Modular Design</strong><br>
+            Use "Exploded View" to inspect the internal hardware.
+        </div>
+
         <div class="controls">
             <button onclick="window.explodePC()">EXPLODE</button>
             <button onclick="window.resetPC()">ASSEMBLE</button>
@@ -31,7 +64,7 @@
         </div>
     </div>
 
-    <!-- GSAP for the "Explode" animation -->
+    <!-- Essential Animation Library -->
     <script src="https://cloudflare.com"></script>
 
     <script type="module">
@@ -39,71 +72,100 @@
         import { OrbitControls } from 'https://jsdelivr.net';
         import { GLTFLoader } from 'https://jsdelivr.net';
 
+        // 1. SETUP
         const scene = new THREE.Scene();
+        const container = document.getElementById('canvas-container');
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 3, 8);
+        camera.position.set(5, 3, 10); // Positioned for a clear view
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        container.appendChild(renderer.domElement);
 
+        // 2. LIGHTING
         scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-        const light = new THREE.DirectionalLight(0xffffff, 2.5);
-        light.position.set(5, 10, 5);
-        scene.add(light);
+        const topLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        topLight.position.set(5, 10, 5);
+        scene.add(topLight);
 
+        const rgbLight = new THREE.PointLight(0x00f2ff, 20, 10);
+        rgbLight.position.set(0, 0, 0); 
+        scene.add(rgbLight);
+
+        // 3. CONTROLS
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        let pc, isRotating = true;
+        // 4. MODEL LOADING (Updated for pc.glb)
+        let model, hue = 0, isRotating = true;
         const loader = new GLTFLoader();
-
-        // LOADING THE MODEL
-        loader.load('./gaming_computer.glb', (gltf) => {
-            pc = gltf.scene;
-            pc.scale.set(1.5, 1.5, 1.5);
-            scene.add(pc);
-            console.log("Model loaded successfully");
-        }, undefined, (err) => {
-            console.error("Loading Error:", err);
-            // If it fails, let's add a cube so you see something
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            pc = new THREE.Mesh(geometry, material);
-            scene.add(pc);
+        
+        loader.load('./pc.glb', (gltf) => {
+            model = gltf.scene;
+            model.scale.set(1.5, 1.5, 1.5);
+            scene.add(model);
+            console.log("SUCCESS: pc.glb loaded.");
+        }, undefined, (error) => {
+            console.error("ERROR: Could not find or load pc.glb", error);
         });
 
-        // ATTACH FUNCTIONS TO WINDOW (So buttons work)
-        window.toggleRotation = () => { 
-            isRotating = !isRotating; 
+        // 5. GLOBAL FUNCTIONS (Attached to window for buttons)
+        window.toggleRotation = () => {
+            isRotating = !isRotating;
             document.getElementById('rot-btn').innerText = `ROTATION: ${isRotating ? 'ON' : 'OFF'}`;
         };
 
         window.explodePC = () => {
-            if (pc) pc.traverse(n => { 
-                if (n.isMesh) gsap.to(n.position, { x: (Math.random()-0.5)*10, y: (Math.random()-0.5)*10, z: (Math.random()-0.5)*10, duration: 1.5 }); 
+            if (!model) return;
+            model.traverse(n => {
+                if (n.isMesh) {
+                    gsap.to(n.position, { 
+                        x: (Math.random()-0.5)*12, 
+                        y: (Math.random()-0.5)*12, 
+                        z: (Math.random()-0.5)*12, 
+                        duration: 1.5, 
+                        ease: "expo.out" 
+                    });
+                }
             });
         };
 
         window.resetPC = () => {
-            if (pc) pc.traverse(n => { 
-                if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1 }); 
+            if (!model) return;
+            model.traverse(n => { 
+                if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1, ease: "power2.inOut" }); 
             });
         };
 
         window.changeColor = (hex) => {
-            if (pc) pc.traverse(n => { if(n.material) n.material.color.setHex(hex); });
+            rgbLight.color.setHex(hex);
+            if (model) {
+                model.traverse(n => { 
+                    if(n.material && n.material.emissive) n.material.emissive.setHex(hex); 
+                });
+            }
         };
 
+        // 6. ANIMATION LOOP
         function animate() {
             requestAnimationFrame(animate);
-            if (isRotating && pc) pc.rotation.y += 0.005;
+            
+            // Auto-cycle RGB Glow
+            hue += 0.002;
+            if (hue > 1) hue = 0;
+            if (rgbLight.color.getHex() !== 0xff0000) { 
+                rgbLight.color.setHSL(hue, 1, 0.5);
+            }
+
+            if (isRotating && model) model.rotation.y += 0.005;
+
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
 
+        // Responsive Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
