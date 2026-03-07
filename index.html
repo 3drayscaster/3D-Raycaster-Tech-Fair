@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberCore v2 | 3D Showcase</title>
     <!-- Google Fonts for Tech Aesthetic -->
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
         body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
@@ -33,6 +33,7 @@
             background: transparent; border: 1px solid var(--neon); color: var(--neon);
             padding: 12px; cursor: pointer; font-family: 'Orbitron', sans-serif;
             font-size: 0.7rem; transition: 0.3s; border-radius: 4px;
+            text-transform: uppercase;
         }
         button:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
         
@@ -71,9 +72,14 @@
     </div>
 
     <!-- Dependencies -->
-    <script src="https://cdnjs.cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
     <script type="importmap">
-      { "imports": { "three": "https://unpkg.com", "three/addons/": "https://unpkg.com" } }
+      { 
+        "imports": { 
+          "three": "https://unpkg.com", 
+          "three/addons/": "https://unpkg.com" 
+        } 
+      }
     </script>
 
     <script type="module">
@@ -93,31 +99,32 @@
         container.appendChild(renderer.domElement);
 
         // 2. LIGHTS
-        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambient);
-        const topLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        const topLight = new THREE.DirectionalLight(0xffffff, 2);
         topLight.position.set(5, 10, 5);
         scene.add(topLight);
 
-        const rgbLight = new THREE.PointLight(0x00f2ff, 15, 3);
-        rgbLight.position.set(0, 0, 0); // Position inside the PC
+        const rgbLight = new THREE.PointLight(0x00f2ff, 20, 10);
+        rgbLight.position.set(0, 0, 0); 
         scene.add(rgbLight);
 
         // 3. CONTROLS
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-               // 4. MODEL LOADING
+        // 4. MODEL LOADING
         let pc, hue = 0, isRotating = true;
         const loader = new GLTFLoader();
         
-        // Use quotes around the filename and ensure it matches your uploaded file exactly
-        loader.load('./Gaming Computer.glb', (gltf) => {
+        // Ensure the filename below matches your GitHub file EXACTLY
+        loader.load('./gaming_computer.glb', (gltf) => {
             pc = gltf.scene;
             pc.scale.set(1.5, 1.5, 1.5);
             scene.add(pc);
+            console.log("Model loaded successfully!");
         }, undefined, (error) => {
-            console.error('Error loading model:', error);
+            console.error("Error loading model. Check filename!", error);
         });
 
         // 5. INTERACTIVE FUNCTIONS
@@ -130,19 +137,31 @@
             if (!pc) return;
             pc.traverse(n => {
                 if (n.isMesh) {
-                    gsap.to(n.position, { x: (Math.random()-0.5)*3, y: (Math.random()-0.5)*3, z: 2, duration: 1.5, ease: "expo.out" });
+                    gsap.to(n.position, { 
+                        x: (Math.random()-0.5)*5, 
+                        y: (Math.random()-0.5)*5, 
+                        z: (Math.random()-0.5)*5, 
+                        duration: 1.5, 
+                        ease: "expo.out" 
+                    });
                 }
             });
         };
 
         window.resetPC = () => {
             if (!pc) return;
-            pc.traverse(n => { if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1 }); });
+            pc.traverse(n => { 
+                if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1, ease: "power2.inOut" }); 
+            });
         };
 
         window.changeColor = (hex) => {
             rgbLight.color.setHex(hex);
-            if (pc) pc.traverse(n => { if(n.material && n.material.emissive) n.material.emissive.setHex(hex); });
+            if (pc) {
+                pc.traverse(n => { 
+                    if(n.material && n.material.emissive) n.material.emissive.setHex(hex); 
+                });
+            }
         };
 
         // 6. ANIMATION LOOP
@@ -152,16 +171,11 @@
             // RGB Hue Cycle
             hue += 0.002;
             if (hue > 1) hue = 0;
-            rgbLight.color.setHSL(hue, 1, 0.5);
+            if (rgbLight.color.getHex() !== 0xff0000) { // Only cycle if not in Red Mode
+                rgbLight.color.setHSL(hue, 1, 0.5);
+            }
 
             if (isRotating && pc) pc.rotation.y += 0.005;
-
-            // Fan Spin Simulation
-            if (pc) {
-                pc.traverse(n => {
-                    if (n.name.toLowerCase().includes("fan")) n.rotation.z += 0.2;
-                });
-            }
 
             controls.update();
             renderer.render(scene, camera);
