@@ -9,7 +9,7 @@
         :root { --neon: #00f2ff; --bg: #050505; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
         #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        .ui-overlay { position: relative; z-index: 2; width: 320px; height: 100vh; padding: 40px; pointer-events: none; background: rgba(0,0,0,0.85); }
+        .ui-overlay { position: relative; z-index: 2; width: 320px; height: 100vh; padding: 40px; pointer-events: none; background: rgba(0,0,0,0.8); }
         .ui-overlay * { pointer-events: auto; }
         h1 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: var(--neon); margin: 0; text-shadow: 0 0 10px var(--neon); }
         .spec-card { background: rgba(255,255,255,0.05); border-left: 3px solid var(--neon); padding: 12px; margin: 20px 0; font-size: 0.85rem; line-height: 1.4; }
@@ -24,18 +24,17 @@
         <h1>CYBERCORE V2</h1>
         <div class="spec-card"><strong>3D SYSTEM INSPECTOR</strong><br>Status: Online<br>Mode: Tech Fair Showcase</div>
         <div class="controls">
-            <button onclick="explodePC()">EXPLODE</button>
-            <button onclick="resetPC()">ASSEMBLE</button>
-            <button id="rot-btn" onclick="toggleRotation()">ROTATION: ON</button>
-            <button onclick="changeColor(0xff0000)">RED MODE</button>
+            <button onclick="window.explodePC()">EXPLODE</button>
+            <button onclick="window.resetPC()">ASSEMBLE</button>
+            <button id="rot-btn" onclick="window.toggleRotation()">ROTATION: ON</button>
+            <button onclick="window.changeColor(0xff0000)">RED MODE</button>
         </div>
     </div>
 
-    <!-- Direct Dependencies (Stable jsDelivr Links) -->
+    <!-- GSAP for the "Explode" animation -->
     <script src="https://cloudflare.com"></script>
 
     <script type="module">
-        // Direct imports from jsDelivr to avoid CORS/Importmap issues
         import * as THREE from 'https://jsdelivr.net';
         import { OrbitControls } from 'https://jsdelivr.net';
         import { GLTFLoader } from 'https://jsdelivr.net';
@@ -60,25 +59,42 @@
         let pc, isRotating = true;
         const loader = new GLTFLoader();
 
-        // RELATIVE PATH: Requires your file to be named exactly gaming_computer.glb
+        // LOADING THE MODEL
         loader.load('./gaming_computer.glb', (gltf) => {
             pc = gltf.scene;
             pc.scale.set(1.5, 1.5, 1.5);
             scene.add(pc);
-            console.log("SUCCESS: 3D model loaded into scene.");
+            console.log("Model loaded successfully");
         }, undefined, (err) => {
-            console.error("CRITICAL ERROR: Failed to load .glb file.", err);
+            console.error("Loading Error:", err);
+            // If it fails, let's add a cube so you see something
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            pc = new THREE.Mesh(geometry, material);
+            scene.add(pc);
         });
 
-        // Global functions for buttons
-        window.toggleRotation = () => { isRotating = !isRotating; };
+        // ATTACH FUNCTIONS TO WINDOW (So buttons work)
+        window.toggleRotation = () => { 
+            isRotating = !isRotating; 
+            document.getElementById('rot-btn').innerText = `ROTATION: ${isRotating ? 'ON' : 'OFF'}`;
+        };
+
         window.explodePC = () => {
-            if (pc) pc.traverse(n => { if (n.isMesh) gsap.to(n.position, { x: (Math.random()-0.5)*10, y: (Math.random()-0.5)*10, z: (Math.random()-0.5)*10, duration: 1.5, ease: "power2.out" }); });
+            if (pc) pc.traverse(n => { 
+                if (n.isMesh) gsap.to(n.position, { x: (Math.random()-0.5)*10, y: (Math.random()-0.5)*10, z: (Math.random()-0.5)*10, duration: 1.5 }); 
+            });
         };
+
         window.resetPC = () => {
-            if (pc) pc.traverse(n => { if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1, ease: "power2.inOut" }); });
+            if (pc) pc.traverse(n => { 
+                if (n.isMesh) gsap.to(n.position, { x: 0, y: 0, z: 0, duration: 1 }); 
+            });
         };
-        window.changeColor = (hex) => { /* Color logic here */ };
+
+        window.changeColor = (hex) => {
+            if (pc) pc.traverse(n => { if(n.material) n.material.color.setHex(hex); });
+        };
 
         function animate() {
             requestAnimationFrame(animate);
