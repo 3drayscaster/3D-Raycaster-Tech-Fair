@@ -3,88 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberCore v2 | Interactive Showcase</title>
-    <!-- Tech Fonts -->
+    <title>CyberCore v2 | Tech Fair 2026</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --bg: #050505; --panel: rgba(0, 0, 0, 0.85); }
-        
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-
-        /* Background 3D Viewport */
-        .model-container {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;
-        }
-        /* The Fixed Embed Link */
+        :root { --neon: #00f2ff; --bg: #050505; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
+        .model-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        /* Professional UI Overlay */
-        .interface {
-            position: relative; z-index: 10; width: 380px; height: 100vh;
-            background: linear-gradient(to right, var(--panel), transparent);
-            padding: 60px 40px; box-sizing: border-box; pointer-events: none;
-        }
-        .interface * { pointer-events: auto; }
-
+        .interface { position: relative; z-index: 10; width: 350px; height: 100vh; padding: 60px 40px; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,0.9), transparent); }
         h1 { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; color: var(--neon); margin: 0; text-shadow: 0 0 15px var(--neon); }
-        .tagline { letter-spacing: 3px; text-transform: uppercase; font-size: 0.7rem; opacity: 0.6; margin-bottom: 30px; }
-
-        .data-card {
-            background: rgba(255, 255, 255, 0.03); border-left: 2px solid var(--neon);
-            padding: 20px; margin: 20px 0; backdrop-filter: blur(10px);
-            border-radius: 0 8px 8px 0; font-size: 0.85rem; line-height: 1.6;
-        }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
-        .label { opacity: 0.5; font-size: 0.7rem; text-transform: uppercase; }
-
-        .instruction-box {
-            border: 1px dashed var(--neon); color: var(--neon);
-            padding: 15px; margin-top: 30px; font-size: 0.75rem; text-transform: uppercase;
-        }
-
-        .footer-note { position: fixed; bottom: 30px; left: 40px; font-size: 0.7rem; opacity: 0.4; }
+        .data-card { background: rgba(255, 255, 255, 0.03); border-left: 2px solid var(--neon); padding: 15px; margin: 20px 0; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <!-- 1. The 3D Model (Sketchfab EMBED version) -->
     <div class="model-container">
-        <!-- The /embed/ path and allow="autoplay" are critical here -->
+        <!-- The Fix: Added sandbox permissions and rs:embed parameter -->
         <iframe 
             title="Custom Gaming PC" 
             src="https://sketchfab.com" 
             allow="autoplay; fullscreen; xr-spatial-tracking" 
-            execution-while-out-of-viewport 
-            execution-while-not-rendered 
-            web-share>
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            allowfullscreen>
         </iframe>
     </div>
 
-    <!-- 2. The Business Interface Overlay -->
     <div class="interface">
-        <p class="tagline">Interactive Tech Fair Demo</p>
+        <p style="letter-spacing: 3px; font-size: 0.7rem; opacity: 0.6;">Interactive Demo</p>
         <h1>CYBERCORE V2</h1>
-        
-        <div class="data-card">
-            <strong>SPECIFICATIONS</strong><br>
-            Next-generation modular computing architecture with active liquid cooling and RGB synchronization.
-        </div>
-
-        <div class="data-card">
-            <div class="stat-row"><span class="label">Cooling</span><span>Dual-Loop Liquid</span></div>
-            <div class="stat-row"><span class="label">GPU</span><span>ASUS ROG STRIX</span></div>
-            <div class="stat-row"><span class="label">RAM</span><span>128GB DDR5 6000MHz</span></div>
-            <div class="stat-row"><span class="label">Chassis</span><span>Tempered Glass / Alloy</span></div>
-        </div>
-
-        <div class="instruction-box">
-            • Drag to Rotate<br>
-            • Scroll to Zoom<br>
-            • Right-Click to Pan
-        </div>
+        <div class="data-card"><strong>HARDWARE STATUS: ONLINE</strong><br>Loading 3D Module...</div>
+        <div class="data-card">Drag to Rotate<br>Scroll to Zoom</div>
     </div>
-
-    <div class="footer-note">Project Developed for Tech Fair 2026 | Model by Yolala3D</div>
 
 </body>
 </html>
