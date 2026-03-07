@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberCore v2 | Interactive Showcase</title>
+    <!-- Tech Fonts -->
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --bg: #050505; --panel: rgba(0, 0, 0, 0.85); }
         
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        /* Full-screen 3D Model */
+        /* Background 3D Viewport */
         .model-container {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1;
         }
+        /* The Fixed Embed Link */
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* UI Overlay */
+        /* Professional UI Overlay */
         .interface {
             position: relative; z-index: 10; width: 380px; height: 100vh;
             background: linear-gradient(to right, var(--panel), transparent);
@@ -35,47 +37,54 @@
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
         .label { opacity: 0.5; font-size: 0.7rem; text-transform: uppercase; }
 
-        .footer-note { position: fixed; bottom: 30px; left: 40px; font-size: 0.7rem; opacity: 0.4; }
+        .instruction-box {
+            border: 1px dashed var(--neon); color: var(--neon);
+            padding: 15px; margin-top: 30px; font-size: 0.75rem; text-transform: uppercase;
+        }
 
-        /* Hide Sketchfab UI elements for a cleaner look */
-        .overlay-blocker { position: fixed; bottom: 0; right: 0; width: 100px; height: 50px; z-index: 5; background: transparent; }
+        .footer-note { position: fixed; bottom: 30px; left: 40px; font-size: 0.7rem; opacity: 0.4; }
     </style>
 </head>
 <body>
 
-    <!-- 1. The 3D Model (Sketchfab Iframe) -->
+    <!-- 1. The 3D Model (Sketchfab EMBED version) -->
     <div class="model-container">
-        <iframe title="Custom Gaming PC" 
-            src="https://sketchfab.com">
+        <!-- The /embed/ path and allow="autoplay" are critical here -->
+        <iframe 
+            title="Custom Gaming PC" 
+            src="https://sketchfab.com" 
+            allow="autoplay; fullscreen; xr-spatial-tracking" 
+            execution-while-out-of-viewport 
+            execution-while-not-rendered 
+            web-share>
         </iframe>
     </div>
 
-    <!-- 2. The Business Interface -->
+    <!-- 2. The Business Interface Overlay -->
     <div class="interface">
-        <p class="tagline">Interactive Product Demo</p>
+        <p class="tagline">Interactive Tech Fair Demo</p>
         <h1>CYBERCORE V2</h1>
         
         <div class="data-card">
-            <strong>HARDWARE OVERVIEW</strong><br>
-            A high-performance modular build designed for 2026 industry standards.
+            <strong>SPECIFICATIONS</strong><br>
+            Next-generation modular computing architecture with active liquid cooling and RGB synchronization.
         </div>
 
         <div class="data-card">
-            <div class="stat-row"><span class="label">Architecture</span><span>Custom Liquid Cooled</span></div>
-            <div class="stat-row"><span class="label">GPU Array</span><span>ASUS ROG Strix</span></div>
-            <div class="stat-row"><span class="label">Memory</span><span>RGB DDR5 Modular</span></div>
-            <div class="stat-row"><span class="label">Sync Mode</span><span>Active Neon-Sync</span></div>
+            <div class="stat-row"><span class="label">Cooling</span><span>Dual-Loop Liquid</span></div>
+            <div class="stat-row"><span class="label">GPU</span><span>ASUS ROG STRIX</span></div>
+            <div class="stat-row"><span class="label">RAM</span><span>128GB DDR5 6000MHz</span></div>
+            <div class="stat-row"><span class="label">Chassis</span><span>Tempered Glass / Alloy</span></div>
         </div>
 
-        <div class="data-card">
-            <strong>USER INTERACTION</strong><br>
-            • Click and drag to rotate unit.<br>
-            • Scroll to zoom components.<br>
-            • Right-click to pan view.
+        <div class="instruction-box">
+            • Drag to Rotate<br>
+            • Scroll to Zoom<br>
+            • Right-Click to Pan
         </div>
     </div>
 
-    <div class="footer-note">Model by Yolala3D | Powered by Sketchfab API</div>
+    <div class="footer-note">Project Developed for Tech Fair 2026 | Model by Yolala3D</div>
 
 </body>
 </html>
