@@ -107,16 +107,18 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // 4. MODEL LOADING
+               // 4. MODEL LOADING
         let pc, hue = 0, isRotating = true;
         const loader = new GLTFLoader();
         
-        // REPLACE URL with your actual .glb path
-        loader.load(Gaming Computer.glb, (gltf) => {
+        // Use quotes around the filename and ensure it matches your uploaded file exactly
+        loader.load('./Gaming Computer.glb', (gltf) => {
             pc = gltf.scene;
             pc.scale.set(1.5, 1.5, 1.5);
             scene.add(pc);
-        }, undefined, (error) => console.error(error));
+        }, undefined, (error) => {
+            console.error('Error loading model:', error);
+        });
 
         // 5. INTERACTIVE FUNCTIONS
         window.toggleRotation = () => {
