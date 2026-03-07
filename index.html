@@ -112,7 +112,7 @@
         const loader = new GLTFLoader();
         
         // REPLACE URL with your actual .glb path
-        loader.load('https://threejs.org', (gltf) => {
+        loader.load(Gaming Computer.glb, (gltf) => {
             pc = gltf.scene;
             pc.scale.set(1.5, 1.5, 1.5);
             scene.add(pc);
