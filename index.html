@@ -3,32 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberCore v2 | Fixed Load</title>
+    <title>CyberCore v2 | Fix Visibility</title>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --bg: #050505; }
-        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        .ui-overlay { position: relative; z-index: 2; width: 320px; padding: 40px; pointer-events: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); overflow: hidden; }
+        
+        /* Force canvas to be visible and fill screen */
+        #canvas-container { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: 0; /* Behind UI but visible */
+            display: block;
+        }
+
+        .ui-overlay { 
+            position: relative; 
+            z-index: 10; 
+            width: 300px; 
+            padding: 40px; 
+            pointer-events: none; 
+            color: white;
+        }
         .ui-overlay * { pointer-events: auto; }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-        button { background: rgba(0,242,255,0.1); border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--neon); text-shadow: 0 0 10px var(--neon); margin: 0; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        button { 
+            background: rgba(0, 242, 255, 0.1); 
+            border: 1px solid var(--neon); 
+            color: var(--neon); 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+        }
         button:hover { background: var(--neon); color: black; }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
+    
     <div class="ui-overlay">
         <h1>CYBERCORE V2</h1>
+        <p>If you see a dark gray screen, the 3D engine is running.</p>
         <div class="controls">
             <button onclick="explodePC()">EXPLODE</button>
             <button onclick="resetPC()">ASSEMBLE</button>
-            <button onclick="changeColor(0xff0044)">RED MODE</button>
         </div>
     </div>
 
+    <!-- GSAP for animations -->
     <script src="https://cloudflare.com"></script>
+    
     <script type="importmap">
     {
         "imports": {
@@ -42,45 +72,59 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+        // 1. SCENE & RENDERER
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 3, 8);
+        // Set a dark gray background so you can confirm the canvas is rendering
+        scene.background = new THREE.Color(0x111111); 
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(6, 4, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // Lights
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        const pointLight = new THREE.PointLight(0x00f2ff, 20, 20);
-        scene.add(pointLight);
+        // 2. LIGHTS (Crucial: Mesh is black without these)
+        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambient);
+        const point = new THREE.PointLight(0x00f2ff, 50, 20);
+        point.position.set(5, 5, 5);
+        scene.add(point);
 
+        // 3. PC MODEL
         const pcGroup = new THREE.Group();
         const originalData = new Map();
 
-        function addPart(w, h, d, col, pos, name) {
-            const mesh = new THREE.Mesh(
-                new THREE.BoxGeometry(w, h, d),
-                new THREE.MeshPhongMaterial({ color: col, emissive: col, emissiveIntensity: 0.2 })
-            );
-            mesh.position.copy(pos);
+        function createBox(w, h, d, color, x, y, z) {
+            const geom = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshPhongMaterial({ color: color });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.position.set(x, y, z);
             pcGroup.add(mesh);
-            originalData.set(mesh.uuid, pos.clone());
+            originalData.set(mesh.uuid, mesh.position.clone());
         }
 
-        // Build simple PC parts
-        addPart(3, 4, 4, 0x111111, new THREE.Vector3(0,0,0), 'case'); // Chassis
-        addPart(0.1, 3.5, 3.5, 0x222222, new THREE.Vector3(-1.4, 0, 0), 'mobo'); // Motherboard
-        addPart(1.5, 0.4, 2.5, 0x333333, new THREE.Vector3(0.3, -0.5, 0.5), 'gpu'); // GPU
+        // Create parts (Centralized for visibility)
+        createBox(3, 4.5, 4, 0x222222, 0, 0, 0); // Case
+        createBox(0.2, 3.8, 3.8, 0x444444, -1.4, 0, 0); // Motherboard
+        createBox(2, 0.5, 3, 0x00f2ff, 0.2, -0.5, 0.2); // GPU (Cyan)
 
         scene.add(pcGroup);
 
+        // 4. CONTROLS
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
+        // 5. GLOBAL ACTIONS
         window.explodePC = () => {
             pcGroup.children.forEach(c => {
-                gsap.to(c.position, { x: (Math.random()-0.5)*10, y: (Math.random()-0.5)*10, z: (Math.random()-0.5)*10, duration: 1 });
+                gsap.to(c.position, { 
+                    x: (Math.random() - 0.5) * 10, 
+                    y: (Math.random() - 0.5) * 10, 
+                    z: (Math.random() - 0.5) * 10, 
+                    duration: 1 
+                });
             });
         };
 
@@ -91,10 +135,7 @@
             });
         };
 
-        window.changeColor = (hex) => {
-            pointLight.color.setHex(hex);
-        };
-
+        // 6. LOOP
         function animate() {
             requestAnimationFrame(animate);
             pcGroup.rotation.y += 0.005;
@@ -103,6 +144,7 @@
         }
         animate();
 
+        // Handle Resizing
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
